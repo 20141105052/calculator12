@@ -29,11 +29,12 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+	void check(CString &ts);
 public:
 	afx_msg void OnClicked1();
 	CString m_str;
 	int flag;
-	int c,c1,c3,c4;
+	double x,y,secag,minag,hag;
 	double temp;
 	afx_msg void OnBnClicked2();
 	afx_msg void OnBnClicked3();
@@ -65,6 +66,5 @@ public:
 	afx_msg void OnBnClickedLn();
 	afx_msg void OnBnClickedZf();
 	afx_msg void OnBnClickedExit();
-	afx_msg void OnBnClickedClock();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };

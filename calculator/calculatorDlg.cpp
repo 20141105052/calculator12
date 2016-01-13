@@ -54,10 +54,7 @@ CcalculatorDlg::CcalculatorDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_str = _T("");
-	c=171;
-	c1=165;
-	c3=180;
-	c4=174;
+	
 }
 
 void CcalculatorDlg::DoDataExchange(CDataExchange* pDX)
@@ -101,7 +98,6 @@ BEGIN_MESSAGE_MAP(CcalculatorDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_LN, &CcalculatorDlg::OnBnClickedLn)
 	ON_BN_CLICKED(IDC_ZF, &CcalculatorDlg::OnBnClickedZf)
 	ON_BN_CLICKED(IDC_EXIT, &CcalculatorDlg::OnBnClickedExit)
-	ON_BN_CLICKED(IDC_CLOCK, &CcalculatorDlg::OnBnClickedClock)
 	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
@@ -136,11 +132,13 @@ BOOL CcalculatorDlg::OnInitDialog()
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
-	SetTimer(1,1000,NULL);
-	SetTimer(2,60000,NULL);
-	SetTimer(3,360000,NULL);
+	
 
 	// TODO: 在此添加额外的初始化代码
+	SetTimer(1,1000,NULL);
+	secag=-0.05;
+	minag=-0.5;
+	hag=3;
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -368,8 +366,6 @@ void CcalculatorDlg::OnBnClickedcalculator()
 	}
 
 	m_str.Format(L"%lf",temp);
-	if(temp/_ttof(m_str))
-		printf("error");
 	while(m_str.Right(1)=="0")
 		m_str.Delete(m_str.GetLength()-1,1);
 	while(m_str.Right(1)==".")
@@ -409,9 +405,8 @@ void CcalculatorDlg::OnBnClickedkaifang()
 	// TODO: 在此添加控件通知处理程序代码
 	UpdateData(true);
 	temp = _ttof(m_str);
-	if(temp==0)
+	if(temp<=0)
 	{
-		//OnBnClickedclear();
 		MessageBox(L"error");
 	}
 	double f=sqrt(temp);
@@ -432,27 +427,16 @@ void CcalculatorDlg::OnBnClickedbaifen()
 	// TODO: 在此添加控件通知处理程序代码
 	UpdateData(true);
 	temp=_ttof(m_str);
-	m_str.Format(L"%lf",temp*_ttof(m_str)/100);
-	if(flag==1||flag==2||flag==3||flag==4)
-		{if(flag==1)
+	temp = _ttof(m_str);
+	double f = temp/100;
+	if(f - int(f) <= 1e-5)
 	{
-		temp=temp+_ttof(m_str);
+		m_str.Format(L"%d",(int)f);
 	}
-		else{
-	if(flag==2)
+	else
 	{
-		temp=temp-_ttof(m_str);
+		m_str.Format(L"%f",f);
 	}
-	if(flag==3)
-	{
-		temp=temp*_ttof(m_str);
-	}
-	if(flag==4)
-	{
-		temp=temp/_ttof(m_str);
-	}
-		}}
-		m_str.Format(L"%lf",temp/10);
 	while(m_str.Right(1)=="0")
 		m_str.Delete(m_str.GetLength()-1,1);
 	while(m_str.Right(1)==".")
@@ -568,6 +552,10 @@ void CcalculatorDlg::OnBnClickedDao()
 	UpdateData(true);
 	temp = _ttof(m_str);
 	double f = 1/temp;
+	if(temp==0)
+	{
+		MessageBox(L"error");
+	}
 	if(f - int(f) <= 1e-5)
 	{
 		m_str.Format(L"%d",(int)f);
@@ -656,109 +644,68 @@ void CcalculatorDlg::OnBnClickedExit()
 }
 
 
-void CcalculatorDlg::OnBnClickedClock()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	CClientDC dc(this);
-	dc.SetWindowOrg(0-535,0-220);
-	CPen *oldpen;
-	CPen pen(PS_SOLID,1,RGB(0,0,0));
-	oldpen=dc.SelectObject(&pen);
-	dc.Ellipse(-100,100,100,-100);
-	dc.Ellipse(-2,-2,2,2);
-	dc.TextOutW(90,-8,L"3");
-	dc.TextOutW(-98,-8,L"9");
-	dc.TextOutW(-8,-99.5,L"12");
-	dc.TextOutW(-2,83,L"6");
-	for(int i=0;i<12;i++)
-	{
-		double l=90,ag=i*3.1415926/6;
-		double a=l*sin(ag)+1,b=-l*cos(ag)+1,c=l*sin(ag)-1,d=-l*cos(ag)-1;
-		dc.Ellipse(a,b,c,d);
-	}
-}
 
 
 void CcalculatorDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-    CDC *pDC5;
-	CPen newpen,*oldpen;
-	newpen.CreatePen(PS_SOLID,2.5,RGB(255,0,0));
-	pDC5=GetDC();
-	oldpen=pDC5->SelectObject(&newpen);
-	pDC5->MoveTo(535,220);
-	pDC5->LineTo(535,160);
-	
-	if(nIDEvent==1)
-	{
-	int r=80,x,x1,y,y1,ox=535,oy=220;
-	CDC *pDC;
-	CPen newpen,*oldpen;
-	newpen.CreatePen(PS_SOLID,1,RGB(255,255,255));
+    CDC *pDC;
 	pDC=GetDC();
-	oldpen=pDC->SelectObject(&newpen);
-    x=ox+r*sin(c*3.1415926/180);
-	y=oy+r*cos(c*3.1415926/180);
-	pDC->MoveTo(ox,oy);
+	pDC->SetWindowOrg(-530,-220);
+	CPen *oldpen;
+	CPen groundpen(PS_SOLID,4,RGB(255,255,255));
+	CPen pen(PS_SOLID,2,RGB(0,0,0));
+	oldpen=pDC->SelectObject(&pen);
+	pDC->Ellipse(-100,100,100,-100);
+	pDC->Ellipse(-1,-1,1,1);
+	pDC->TextOutW(90,-8,L"3");
+	pDC->TextOutW(-98,-8,L"9");
+	pDC->TextOutW(-8,-99.5,L"12");
+	pDC->TextOutW(-2,83,L"6");
+	
+
+
+    double L1=80,L2=70,L3=60;         
+	oldpen=pDC->SelectObject(&groundpen);
+	x=L1*sin(secag);
+	y=-L1*cos(secag);
+	pDC->MoveTo(0,0);
 	pDC->LineTo(x,y);
-	c=c-6;
-	CDC *pDC1;
-	CPen newpen1,*oldpen1;
-	newpen1.CreatePen(PS_SOLID,1,RGB(0,0,0));
-	pDC1=GetDC();
-	oldpen1=pDC1->SelectObject(&newpen1);
-    x1=ox+r*sin(c1*3.1415926/180);
-	y1=oy+r*cos(c1*3.1415926/180);
-	pDC1->MoveTo(ox,oy);
-	pDC1->LineTo(x1,y1);
-	c1=c1-6;
-	
-	}
-	
-	if(nIDEvent==2)
-	{
-		int r=60,x3,x4,y3,y4,ox=535,oy=220;
-	CDC *pDC3;
-	CPen newpen,*oldpen;
-	newpen.CreatePen(PS_SOLID,1.5,RGB(255,255,255));
-	pDC3=GetDC();
-	oldpen=pDC3->SelectObject(&newpen);
-    x3=ox+r*sin(c3*3.1415926/180);
-	y3=oy+r*cos(c3*3.1415926/180);
-	pDC3->MoveTo(ox,oy);
-	pDC3->LineTo(x3,y3);
-	c3=c3-6;
-	CDC *pDC4;
-	CPen newpen1,*oldpen1;
-	newpen1.CreatePen(PS_SOLID,3,RGB(0,100,255));
-	pDC4=GetDC();
-	oldpen1=pDC4->SelectObject(&newpen1);
-    x4=ox+r*sin(c4*3.1415926/180);
-	y4=oy+r*cos(c4*3.1415926/180);
-	pDC4->MoveTo(ox,oy);
-	pDC4->LineTo(x4,y4);
-	c4=c4-6;
+	CPen secpen(PS_SOLID,1,RGB(150,150,150));
+	oldpen=pDC->SelectObject(&secpen);
+	secag=secag+3.1415926/30;
+	x=L1*sin(secag);
+	y=-L1*cos(secag);
+	pDC->MoveTo(0,0);
+	pDC->LineTo(x,y);
 
-	
-	
-	
-	}
-	if(nIDEvent==3)
-	{
-		int r=60,x3,x4,y3,y4,ox=535,oy=220;
-	    CDC *pDC3;
-	    CPen newpen,*oldpen;
-	    newpen.CreatePen(PS_SOLID,1,RGB(255,255,255));
-	    pDC3=GetDC();
-	    oldpen=pDC3->SelectObject(&newpen);
-        x3=ox+r*sin(c3*3.1415926/180);
-	    y3=oy+r*cos(c3*3.1415926/180);
-	    pDC3->MoveTo(ox,oy);
-	    pDC3->LineTo(x3,y3);
-	    c3=c3-6;
-	}
 
+
+	oldpen=pDC->SelectObject(&groundpen);
+	x=L2*sin(minag);
+	y=-L2*cos(minag);
+	pDC->MoveTo(0,0);
+	pDC->LineTo(x,y);
+	CPen minpen(PS_SOLID,1.5,RGB(255,110,0));
+	oldpen=pDC->SelectObject(&minpen);
+	minag=minag+3.1415926/1800;
+	x=L2*sin(minag);
+	y=-L2*cos(minag);
+	pDC->MoveTo(0,0);
+	pDC->LineTo(x,y);
+
+	oldpen=pDC->SelectObject(&groundpen);
+	x=L3*sin(hag);
+	y=-L3*cos(hag);
+	pDC->MoveTo(0,0);
+	pDC->LineTo(x,y);
+	CPen hpen(PS_SOLID,2,RGB(255,0,255));
+	oldpen=pDC->SelectObject(&hpen);
+	hag=hag+3.1415926/21600;
+	x=L3*sin(hag);
+	y=-L3*cos(hag);
+	pDC->MoveTo(0,0);
+	pDC->LineTo(x,y);
 
 	CDialogEx::OnTimer(nIDEvent);
 }
